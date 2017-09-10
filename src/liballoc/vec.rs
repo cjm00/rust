@@ -1277,6 +1277,29 @@ impl<T: Clone> Vec<T> {
     pub fn extend_from_slice(&mut self, other: &[T]) {
         self.spec_extend(other.iter())
     }
+
+
+    pub fn insert_slice(&mut self, index: usize, other: &[T]) {
+        let len = self.len();
+        let other_len = other.len();
+        assert!(index <= len);
+
+        self.reserve(other_len);
+
+        unsafe {
+            let p = self.as_mut_ptr().offset(index as isize);
+
+            ptr::copy(p, p.offset(other_len), len - index);
+            for element in other.iter() {
+                ptr::write(p, element);
+                ptr = ptr.offset(1);
+            }
+
+            self.set_len(len + other_len);
+
+        }
+    }
+
 }
 
 impl<T: Default> Vec<T> {
